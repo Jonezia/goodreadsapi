@@ -5,5 +5,7 @@
 {% endblock %}
 
 {% block body %}
-  <p>This is some text</p>
+  <p>{{ homemessage }}</p>
+  <a href="{{ url_for('login_template')}}">Login</a>
+  <a href="{{ url_for('logout_template')}}">Logout</a>
 {% endblock %}

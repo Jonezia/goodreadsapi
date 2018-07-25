@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+  Logout
+{% endblock %}
+
+{% block body %}
+  <p>You have been successfully logged out</p>
+  <a href="{{ url_for('home_template')}}">Home</a>
+{% endblock %}
