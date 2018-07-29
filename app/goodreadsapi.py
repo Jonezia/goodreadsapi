@@ -1,6 +1,13 @@
+import os
+
 from flask import Flask, render_template, request, session, url_for, escape, flash, redirect
+#from sqlalchemy import create_engine
+#from sqlalchemy.orm import scoped_session, sessionmaker
 
 app = Flask(__name__)
+
+#engine = create_engine(os.GETenv("DATABASE_URL"))
+#db = scoped_session(sessionmaker(bind=engine))
 
 app.secret_key = 'adamiscool'
 
@@ -22,7 +29,7 @@ def home_template():
             flash("login failed, please retry")
             return redirect(url_for('login_template'))
 
-userdatabase = {"adam":"password1","micah":"password2"}
+userdatabase = {"admin":"adminpassword","adam":"adampassword"}
 
 @app.route('/login', methods=['GET','POST'])
 def login_template():
@@ -30,11 +37,15 @@ def login_template():
         return render_template('login.html')
     elif request.method == 'POST':
         if request.form['password'] == request.form['confirmpassword']:
-            userdatabase[request.form['username']] = request.form['password']
-            flash('You have successfully registered an account')
-            return redirect(url_for('login_template'))
+            if request.form['username'] in userdatabase:
+                flash('This username is in use')
+                return redirect(url_for('register_template'))
+            else:
+                userdatabase[request.form['username']] = request.form['password']
+                flash('You have successfully registered an account')
+                return redirect(url_for('login_template'))
         else:
-            flash("Registration failed, please retry")
+            flash("Passwords do not match, please retry")
             return redirect(url_for('register_template'))
 
 @app.route('/register')
@@ -49,7 +60,11 @@ def logout_template():
 
 @app.route('/search')
 def search_template():
-    return render_template('search.html')
+    if request.method == 'GET':
+        return render_template('search.html')
+    elif request.method == 'POST':
+        results = db.execute("SELECT * FROM flights WHERE origin LIKE '%'+request.form['query']+'%'")
+        return render_template('search.html', results=results)
 
 @app.route('/book')
 def book_template():

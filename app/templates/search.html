@@ -5,5 +5,15 @@
 {% endblock %}
 
 {% block body %}
-  <input type="text" placeholder="search">
+<form action="{{ url_for('search.html')}}" method="post">
+  <input type="text" name="query" placeholder="Search for an isbn, title, author, or year of publication">
+  <button>Search</button>
+
+<div>
+{% for result in results %}
+  <a href="{{ url_for('home_template') }}">{{result.isbn}}, {{result.title}}, {{result.author}}, {{result.year}}</a>
+{% endfor %}
+</div>
+
+</form>
 {% endblock %}
