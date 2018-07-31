@@ -8,4 +8,7 @@
   <p>{{ homemessage }}</p>
   <a href="{{ url_for('login_template')}}">Login</a>
   <a href="{{ url_for('logout_template')}}">Logout</a>
+  {% if loggedin == True %}
+    <a href="{{ url_for('search_template')}}">Search</a>
+  {% endif %}
 {% endblock %}

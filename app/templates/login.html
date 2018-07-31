@@ -5,14 +5,12 @@
 {% endblock %}
 
 {% block body %}
-<div>
-  <form action="{{url_for('home_template')}}" method="POST">
-    <input type="text" name="username" placeholder="username">
-    <input type="password" name="password" placeholder="password">
-    <button>Login</button>
-  </form>
-  <p>Don't have an account?</p>
-  <a href={{ url_for('register_template')}}> Register</a>
-  <a href="{{ url_for('home_template')}}">Home</a>
-</div>
+<form action="{{url_for('home_template')}}" method="POST">
+  <input type="text" name="username" placeholder="username">
+  <input type="password" name="password" placeholder="password">
+  <button>Login</button>
+</form>
+<p>Don't have an account?</p>
+<a href={{ url_for('register_template')}}> Register</a>
+<a href="{{ url_for('home_template')}}">Home</a> 
 {% endblock %}

@@ -1,17 +1,20 @@
-{% extends layout.html %}
+{% extends 'layout.html' %}
 
 {% block header %}
   Search
 {% endblock %}
 
 {% block body %}
-<form action="{{ url_for('search.html')}}" method="post">
+<form action="{{ url_for('search_template')}}" method="post">
   <input type="text" name="query" placeholder="Search for an isbn, title, author, or year of publication">
   <button>Search</button>
 
 <div>
 {% for result in results %}
-  <a href="{{ url_for('home_template') }}">{{result.isbn}}, {{result.title}}, {{result.author}}, {{result.year}}</a>
+  <div>
+    <a href="{{ url_for('home_template') }}" class="booklink">
+    {{result.isbn}}, {{result.title}}, {{result.author}}, {{result.year}}</a>
+  </div>
 {% endfor %}
 </div>
 

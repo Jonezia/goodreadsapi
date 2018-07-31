@@ -1,13 +1,15 @@
 import os
 
 from flask import Flask, render_template, request, session, url_for, escape, flash, redirect
-#from sqlalchemy import create_engine
-#from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 app = Flask(__name__)
 
-#engine = create_engine(os.GETenv("DATABASE_URL"))
-#db = scoped_session(sessionmaker(bind=engine))
+#export DATABASE_URL=postgres://utghlhxnukoghb:d2c56b981ec9b5e71dcb702cde71369bf5a616f4a01666331f92ac78db608690@ec2-54-217-235-166.eu-west-1.compute.amazonaws.com:5432/d6lo9nlkfrqrtr
+
+engine = create_engine(os.getenv("DATABASE_URL"))
+db = scoped_session(sessionmaker(bind=engine))
 
 app.secret_key = 'adamiscool'
 
@@ -17,9 +19,11 @@ def home_template():
         homemessage = ""
         if session.get('username') is None or session['username'] == "":
             homemessage = "You are not logged in"
+            loggedin = False
         else:
             homemessage = "You are logged in as %s" % escape(session['username'])
-        return render_template('home.html',homemessage=homemessage)
+            loggedin = True
+        return render_template('home.html',homemessage=homemessage, loggedin=loggedin)
     elif request.method == 'POST':
         if request.form['password'] == userdatabase[request.form['username']]:
             session['username']=request.form['username']
@@ -58,12 +62,14 @@ def logout_template():
     flash("You have been successfully logged out")
     return redirect(url_for('home_template'))
 
-@app.route('/search')
+@app.route('/search', methods=['GET','POST'])
 def search_template():
     if request.method == 'GET':
         return render_template('search.html')
     elif request.method == 'POST':
-        results = db.execute("SELECT * FROM flights WHERE origin LIKE '%'+request.form['query']+'%'")
+        query = '%'+request.form['query']+'%'
+        results = db.execute("SELECT * FROM books WHERE isbn ILIKE :query \
+        OR title ILIKE :query OR author ILIKE :query OR year ILIKE :query", {"query":query})
         return render_template('search.html', results=results)
 
 @app.route('/book')
