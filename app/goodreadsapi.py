@@ -72,6 +72,7 @@ def search_template():
         OR title ILIKE :query OR author ILIKE :query OR year ILIKE :query", {"query":query})
         return render_template('search.html', results=results)
 
-@app.route('/book')
-def book_template():
-    return render_template('book.html')
+@app.route('/book/<string:isbn>')
+def book_template(isbn):
+    book = db.execute("SELECT isbn,title,author,year FROM books WHERE isbn=:isbn", {"isbn":isbn}).fetchone()
+    return render_template('book.html', isbn=book.isbn, title=book.title, author=book.author, year=book.year)

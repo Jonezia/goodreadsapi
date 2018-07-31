@@ -1,9 +1,9 @@
-{% extends layout.html %}
+{% extends 'layout.html' %}
 
 {% block header %}
-  Book
+  {{title}}
 {% endblock %}
 
 {% block body %}
-  <p>This is some text</p>
+  <p>Written by {{author}}, in {{year}}, with isbn {{isbn}}</p>
 {% endblock %}
