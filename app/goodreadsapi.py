@@ -65,12 +65,12 @@ def logout_template():
 @app.route('/search', methods=['GET','POST'])
 def search_template():
     if request.method == 'GET':
-        return render_template('search.html')
+        return render_template('search.html',method="get")
     elif request.method == 'POST':
         query = '%'+request.form['query']+'%'
         results = db.execute("SELECT * FROM books WHERE isbn ILIKE :query \
-        OR title ILIKE :query OR author ILIKE :query OR year ILIKE :query", {"query":query})
-        return render_template('search.html', results=results)
+        OR title ILIKE :query OR author ILIKE :query OR year ILIKE :query", {"query":query}).fetchall()
+        return render_template('search.html', results=results, method="post")
 
 @app.route('/book/<string:isbn>')
 def book_template(isbn):

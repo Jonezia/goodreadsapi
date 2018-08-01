@@ -6,17 +6,31 @@
 
 {% block body %}
 <form action="{{ url_for('search_template')}}" method="post">
-  <input type="text" name="query" placeholder="Search for an isbn, title, author, or year of publication">
+  <input type="text" name="query" placeholder="Search for an isbn, title, author, or year of publication"
+  id="searchbar">
   <button>Search</button>
+</form>
 
 <div>
+
 {% for result in results %}
+  {% if loop.first == True %}
+    {% if loop.revindex == 1 %}
+      <p class="resultcount">1 result found</p>
+    {% else %}
+      <p class="resultcount">{{loop.revindex}} results found</p>
+    {% endif %}
+  {% endif %}
   <div>
     <a href="{{ url_for('book_template',isbn=result.isbn) }}" class="booklink">
-    {{result.isbn}}, {{result.title}}, {{result.author}}, {{result.year}}</a>
+  [{{loop.index}}]: {{result.isbn}}, {{result.title}}, {{result.author}}, {{result.year}}</a>
   </div>
+{% else %}
+  {% if method=="post" %}
+    <p class="resultcount">Sorry, no results found</p>
+  {% endif %}
 {% endfor %}
+
 </div>
 
-</form>
 {% endblock %}
