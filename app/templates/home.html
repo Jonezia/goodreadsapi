@@ -6,8 +6,12 @@
 
 {% block body %}
   <p>{{ homemessage }}</p>
-  <a href="{{ url_for('login_template')}}">Login</a>
+  {% if loggedin == False %}
+    <a href="{{ url_for('login_template')}}">Login</a>
+  {% endif %}
+  {% if loggedin == True %}
   <a href="{{ url_for('logout_template')}}">Logout</a>
+  {% endif %}
   {% if loggedin == True %}
     <a href="{{ url_for('search_template')}}">Search</a>
   {% endif %}

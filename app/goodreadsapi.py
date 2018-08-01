@@ -13,6 +13,7 @@ db = scoped_session(sessionmaker(bind=engine))
 
 app.secret_key = 'adamiscool'
 
+#Logging in from login.html to home.html
 @app.route('/', methods=['GET','POST'])
 def home_template():
     if request.method == 'GET':
@@ -25,7 +26,9 @@ def home_template():
             loggedin = True
         return render_template('home.html',homemessage=homemessage, loggedin=loggedin)
     elif request.method == 'POST':
-        if request.form['password'] == userdatabase[request.form['username']]:
+        databasepass = db.execute("SELECT password FROM users WHERE username=:username",
+        {"username": request.form['username']}).fetchone()
+        if request.form['password'] == databasepass.password:
             session['username']=request.form['username']
             flash('You have been successfully logged in')
             return redirect(url_for('home_template'))
@@ -33,21 +36,23 @@ def home_template():
             flash("login failed, please retry")
             return redirect(url_for('login_template'))
 
-userdatabase = {"admin":"adminpassword","adam":"adampassword"}
-
+#Registering a new account from register.html to login.html
 @app.route('/login', methods=['GET','POST'])
 def login_template():
     if request.method == 'GET':
         return render_template('login.html')
     elif request.method == 'POST':
         if request.form['password'] == request.form['confirmpassword']:
-            if request.form['username'] in userdatabase:
-                flash('This username is in use')
-                return redirect(url_for('register_template'))
-            else:
-                userdatabase[request.form['username']] = request.form['password']
+            if db.execute("SELECT * FROM users WHERE username=:username",
+            {"username": request.form['username']}).fetchone() == None:
+                db.execute("INSERT INTO users (username, password) VALUES (:username, :password)",
+                {"username": request.form['username'], "password": request.form['password']})
+                db.commit()
                 flash('You have successfully registered an account')
                 return redirect(url_for('login_template'))
+            else:
+                flash('This username is in use')
+                return redirect(url_for('register_template'))
         else:
             flash("Passwords do not match, please retry")
             return redirect(url_for('register_template'))
@@ -72,6 +77,7 @@ def search_template():
         OR title ILIKE :query OR author ILIKE :query OR year ILIKE :query", {"query":query}).fetchall()
         return render_template('search.html', results=results, method="post")
 
+#Personalised book page of book with isbn as /book/"isbn"
 @app.route('/book/<string:isbn>')
 def book_template(isbn):
     book = db.execute("SELECT isbn,title,author,year FROM books WHERE isbn=:isbn", {"isbn":isbn}).fetchone()
