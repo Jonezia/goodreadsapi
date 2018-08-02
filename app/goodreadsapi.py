@@ -13,7 +13,6 @@ db = scoped_session(sessionmaker(bind=engine))
 
 app.secret_key = 'adamiscool'
 
-#Logging in from login.html to home.html
 @app.route('/', methods=['GET','POST'])
 def home_template():
     if request.method == 'GET':
@@ -25,6 +24,7 @@ def home_template():
             homemessage = "You are logged in as %s" % escape(session['username'])
             loggedin = True
         return render_template('home.html',homemessage=homemessage, loggedin=loggedin)
+#Logging in from login.html to home.html
     elif request.method == 'POST':
         databasepass = db.execute("SELECT password FROM users WHERE username=:username",
         {"username": request.form['username']}).fetchone()
@@ -36,11 +36,11 @@ def home_template():
             flash("login failed, please retry")
             return redirect(url_for('login_template'))
 
-#Registering a new account from register.html to login.html
 @app.route('/login', methods=['GET','POST'])
 def login_template():
     if request.method == 'GET':
         return render_template('login.html')
+#Registering a new account from register.html to login.html
     elif request.method == 'POST':
         if request.form['password'] == request.form['confirmpassword']:
             if db.execute("SELECT * FROM users WHERE username=:username",
@@ -85,8 +85,10 @@ def book_template(isbn):
         {"isbn":isbn}).fetchone()
         bookinfo = db.execute("SELECT username,review,rating FROM books JOIN reviews \
         ON books.isbn = reviews.isbn WHERE books.isbn=:isbn",{"isbn":isbn}).fetchall()
+        reviewsubmitted = db.execute("SELECT COUNT(*) FROM reviews WHERE isbn=:isbn \
+        and username=:username",{"isbn":isbn,"username":session['username']}).fetchone()
         return render_template('book.html', isbn=book.isbn,title=book.title, author=book.author,
-        year=book.year, bookinfo=bookinfo)
+        year=book.year, bookinfo=bookinfo,reviewsubmitted=reviewsubmitted)
     elif request.method == 'POST':
         db.execute("INSERT INTO reviews (isbn,username,review,rating) VALUES (:isbn,:username,:review,:rating)",
         {"isbn":isbn,"username":session['username'],"review":request.form['review'],"rating":request.form['rating']})
