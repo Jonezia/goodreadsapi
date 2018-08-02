@@ -83,19 +83,19 @@ def book_template(isbn):
     if request.method == 'GET':
         book = db.execute("SELECT isbn,title,author,year FROM books WHERE isbn=:isbn LIMIT 1",
         {"isbn":isbn}).fetchone()
-        bookinfo = db.execute("SELECT username,review FROM books JOIN reviews \
+        bookinfo = db.execute("SELECT username,review,rating FROM books JOIN reviews \
         ON books.isbn = reviews.isbn WHERE books.isbn=:isbn",{"isbn":isbn}).fetchall()
         return render_template('book.html', isbn=book.isbn,title=book.title, author=book.author,
         year=book.year, bookinfo=bookinfo)
     elif request.method == 'POST':
-        db.execute("INSERT INTO reviews (isbn, username, review) VALUES (:isbn, :username, :review)",
-        {"isbn":isbn, "username":session['username'], "review":request.form['review']})
+        db.execute("INSERT INTO reviews (isbn,username,review,rating) VALUES (:isbn,:username,:review,:rating)",
+        {"isbn":isbn,"username":session['username'],"review":request.form['review'],"rating":request.form['rating']})
         db.commit()
         return redirect(url_for('book_template',isbn=isbn))
 
 #Profile page with username as /user/"username"
 @app.route('/profile/<string:username>')
 def profile_template(username):
-    reviews = db.execute("SELECT books.isbn,title,review FROM books JOIN reviews ON \
+    reviews = db.execute("SELECT books.isbn,title,review,rating FROM books JOIN reviews ON \
     books.isbn = reviews.isbn WHERE reviews.username=:username",{"username":username}).fetchall()
     return render_template('profile.html',username=username.capitalize(),reviews=reviews)
