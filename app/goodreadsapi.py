@@ -96,4 +96,6 @@ def book_template(isbn):
 #Profile page with username as /user/"username"
 @app.route('/profile/<string:username>')
 def profile_template(username):
-    return render_template('profile.html',username=username.capitalize())
+    reviews = db.execute("SELECT title,review FROM books JOIN reviews ON \
+    books.isbn = reviews.isbn WHERE reviews.username=:username",{"username":username}).fetchall()
+    return render_template('profile.html',username=username.capitalize(),reviews=reviews)

@@ -9,9 +9,9 @@
 
   <h3>Reviews:</h3>
   {% for row in bookinfo %}
-    <div>
-      {{row.username|capitalize}}:
-      {{row.review|capitalize}}
+    <div class="reviews">
+      <div><strong>{{row.username|capitalize}}:</strong></div>
+      <div>{{row.review|capitalize}}</div>
     </div>
   {% else %}
     <p>No reviews yet</p>
