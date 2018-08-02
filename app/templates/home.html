@@ -15,4 +15,7 @@
   {% if loggedin == True %}
     <a href="{{ url_for('search_template')}}">Search</a>
   {% endif %}
+  {% if loggedin == True %}
+    <a href="{{ url_for('profile_template',username=session['username'])}}">Profile</a>
+  {% endif %}
 {% endblock %}

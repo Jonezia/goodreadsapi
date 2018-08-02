@@ -77,8 +77,23 @@ def search_template():
         OR title ILIKE :query OR author ILIKE :query OR year ILIKE :query", {"query":query}).fetchall()
         return render_template('search.html', results=results, method="post")
 
-#Personalised book page of book with isbn as /book/"isbn"
-@app.route('/book/<string:isbn>')
+#Personalised page of book with isbn as /book/"isbn"
+@app.route('/book/<string:isbn>', methods=['GET','POST'])
 def book_template(isbn):
-    book = db.execute("SELECT isbn,title,author,year FROM books WHERE isbn=:isbn", {"isbn":isbn}).fetchone()
-    return render_template('book.html', isbn=book.isbn, title=book.title, author=book.author, year=book.year)
+    if request.method == 'GET':
+        book = db.execute("SELECT isbn,title,author,year FROM books WHERE isbn=:isbn LIMIT 1",
+        {"isbn":isbn}).fetchone()
+        bookinfo = db.execute("SELECT username,review FROM books JOIN reviews \
+        ON books.isbn = reviews.isbn WHERE books.isbn=:isbn",{"isbn":isbn}).fetchall()
+        return render_template('book.html', isbn=book.isbn,title=book.title, author=book.author,
+        year=book.year, bookinfo=bookinfo)
+    elif request.method == 'POST':
+        db.execute("INSERT INTO reviews (isbn, username, review) VALUES (:isbn, :username, :review)",
+        {"isbn":isbn, "username":session['username'], "review":request.form['review']})
+        db.commit()
+        return redirect(url_for('book_template',isbn=isbn))
+
+#Profile page with username as /user/"username"
+@app.route('/profile/<string:username>')
+def profile_template(username):
+    return render_template('profile.html',username=username.capitalize())
