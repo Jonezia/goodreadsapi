@@ -8,7 +8,9 @@
   <h3>Reviews:</h3>
   {% for review in reviews %}
     <div class="reviews">
-      <div><strong>{{review.title|capitalize}}:</strong></div>
+      <div><a href="{{ url_for('book_template',isbn=review.isbn) }}">
+        <strong>{{review.title|capitalize}}:</strong></a>
+      </div>
       <div>{{review.review|capitalize}}</div>
     </div>
   {% else %}
