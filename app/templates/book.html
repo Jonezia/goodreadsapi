@@ -9,18 +9,26 @@
 
   {% if goodreadsapi == True %}
   <h3>Goodreads API information:</h3>
-    <p>Number of ratings: {{ratingcount}}</p>
-    <p>Average rating: {{averagerating}}</p>
+    <p>Number of ratings: {{goodreadsratingcount}}</p>
+    <p>Average rating: {{goodreadsaveragerating}}</p>
   {% endif %}
 
   <h3>Reviews:</h3>
-  {% for row in bookinfo %}
-    <div class="reviews">
-      <div><a href="{{ url_for('profile_template',username=row.username) }}">
-        <strong>{{row.username|capitalize}}:</strong></a> {{row.rating}}/5
-      </div>
-      <div>{{row.review|capitalize}}</div>
+
+  {% if reviewnumber > 0 %}
+    <div class="resultcount">
+    <p>Number of reviews: {{reviewnumber}}</p>
+    <p>Average rating: {{averagerating}}</p>
     </div>
+  {% endif %}
+
+  {% for row in bookinfo %}
+      <div class="reviews">
+        <div><a href="{{ url_for('profile_template',username=row.username) }}">
+          <strong>{{row.username|capitalize}}:</strong></a> {{row.rating}}/5
+        </div>
+        <div>{{row.review|capitalize}}</div>
+      </div>
   {% else %}
     <p>No reviews yet</p>
   {% endfor %}

@@ -7,6 +7,15 @@
 {% block body %}
   <h3>Reviews:</h3>
   {% for review in reviews %}
+    <div class="resultcount">
+    {% if loop.first == True %}
+      {% if loop.revindex == 1 %}
+        <p>1 review</p>
+      {% else %}
+        <p>{{loop.revindex}} reviews</p>
+      {% endif %}
+    {% endif %}
+    </div>
     <div class="reviews">
       <div><a href="{{ url_for('book_template',isbn=review.isbn) }}">
         <strong>{{review.title|capitalize}}:</strong></a> {{review.rating}}/5

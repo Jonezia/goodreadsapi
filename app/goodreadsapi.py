@@ -1,7 +1,7 @@
 import os
 import requests
 
-from flask import Flask, render_template, request, session, url_for, escape, flash, redirect
+from flask import Flask, render_template, request, session, url_for, escape, flash, redirect, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -86,6 +86,16 @@ def book_template(isbn):
         {"isbn":isbn}).fetchone()
         bookinfo = db.execute("SELECT username,review,rating FROM books JOIN reviews \
         ON books.isbn = reviews.isbn WHERE books.isbn=:isbn",{"isbn":isbn}).fetchall()
+        reviewcount = 0
+        for row in bookinfo:
+            reviewcount += 1
+        totalrating = 0
+        for row in bookinfo:
+            totalrating += row.rating
+        if reviewcount > 0:
+            averagerating = round(totalrating/reviewcount,3)
+        else:
+            averagerating = None
         reviewsubmitted = db.execute("SELECT COUNT(*) FROM reviews WHERE isbn=:isbn \
         and username=:username",{"isbn":isbn,"username":session['username']}).fetchone()
         #Number of ratings and average ratings from goodreads API
@@ -93,15 +103,16 @@ def book_template(isbn):
         try:
             info = res.json()
             goodreadsapi = True
-            ratingcount = info["books"][0]["work_ratings_count"]
-            averagerating = info["books"][0]["average_rating"]
+            goodreadsratingcount = info["books"][0]["work_ratings_count"]
+            goodreadsaveragerating = info["books"][0]["average_rating"]
         except ValueError:
             goodreadsapi = False
-            ratingcount = None
-            averagerating = None
+            goodreadsratingcount = None
+            goodreadsaveragerating = None
         return render_template('book.html', isbn=book.isbn,title=book.title, author=book.author,
-        year=book.year, bookinfo=bookinfo,reviewsubmitted=reviewsubmitted,ratingcount=ratingcount,
-        averagerating=averagerating,goodreadsapi=goodreadsapi)
+        year=book.year, bookinfo=bookinfo,reviewsubmitted=reviewsubmitted,goodreadsratingcount=goodreadsratingcount,
+        goodreadsaveragerating=goodreadsaveragerating,goodreadsapi=goodreadsapi,averagerating=averagerating,
+        reviewnumber=reviewcount)
     elif request.method == 'POST':
         db.execute("INSERT INTO reviews (isbn,username,review,rating) VALUES (:isbn,:username,:review,:rating)",
         {"isbn":isbn,"username":session['username'],"review":request.form['review'],"rating":request.form['rating']})
@@ -114,3 +125,30 @@ def profile_template(username):
     reviews = db.execute("SELECT books.isbn,title,review,rating FROM books JOIN reviews ON \
     books.isbn = reviews.isbn WHERE reviews.username=:username",{"username":username}).fetchall()
     return render_template('profile.html',username=username.capitalize(),reviews=reviews)
+
+@app.route('/api/<string:isbn>')
+def goodreadsapi(isbn):
+    apibook = db.execute("SELECT isbn,title,author,year FROM books WHERE isbn=:isbn LIMIT 1",
+    {"isbn":isbn}).fetchone()
+    if apibook is None:
+        return jsonify({"error":"Invalid isbn"}), 422
+    apibookinfo = db.execute("SELECT username,review,rating FROM books JOIN reviews \
+    ON books.isbn = reviews.isbn WHERE books.isbn=:isbn",{"isbn":isbn}).fetchall()
+    apireviewcount = 0
+    for row in apibookinfo:
+        apireviewcount += 1
+    apitotalrating = 0
+    for row in apibookinfo:
+        apitotalrating += row.rating
+    if apireviewcount > 0:
+        apiaveragescore = apitotalrating/apireviewcount
+    else:
+        apiaveragescore = None
+    return jsonify({
+        "title": apibook.title,
+        "author": apibook.author,
+        "year": apibook.year,
+        "isbn": apibook.isbn,
+        "review_count": apireviewcount,
+        "average_score": apiaveragescore
+    })
