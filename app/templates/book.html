@@ -7,6 +7,12 @@
 {% block body %}
   <p>Written by {{author}} in {{year}}</p>
 
+  {% if goodreadsapi == True %}
+  <h3>Goodreads API information:</h3>
+    <p>Number of ratings: {{ratingcount}}</p>
+    <p>Average rating: {{averagerating}}</p>
+  {% endif %}
+
   <h3>Reviews:</h3>
   {% for row in bookinfo %}
     <div class="reviews">

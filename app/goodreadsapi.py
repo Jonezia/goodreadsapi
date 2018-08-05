@@ -1,4 +1,5 @@
 import os
+import requests
 
 from flask import Flask, render_template, request, session, url_for, escape, flash, redirect
 from sqlalchemy import create_engine
@@ -87,8 +88,20 @@ def book_template(isbn):
         ON books.isbn = reviews.isbn WHERE books.isbn=:isbn",{"isbn":isbn}).fetchall()
         reviewsubmitted = db.execute("SELECT COUNT(*) FROM reviews WHERE isbn=:isbn \
         and username=:username",{"isbn":isbn,"username":session['username']}).fetchone()
+        #Number of ratings and average ratings from goodreads API
+        res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "wOS748LUFfkpEbebmy3HuA", "isbns": isbn})
+        try:
+            info = res.json()
+            goodreadsapi = True
+            ratingcount = info["books"][0]["work_ratings_count"]
+            averagerating = info["books"][0]["average_rating"]
+        except ValueError:
+            goodreadsapi = False
+            ratingcount = None
+            averagerating = None
         return render_template('book.html', isbn=book.isbn,title=book.title, author=book.author,
-        year=book.year, bookinfo=bookinfo,reviewsubmitted=reviewsubmitted)
+        year=book.year, bookinfo=bookinfo,reviewsubmitted=reviewsubmitted,ratingcount=ratingcount,
+        averagerating=averagerating,goodreadsapi=goodreadsapi)
     elif request.method == 'POST':
         db.execute("INSERT INTO reviews (isbn,username,review,rating) VALUES (:isbn,:username,:review,:rating)",
         {"isbn":isbn,"username":session['username'],"review":request.form['review'],"rating":request.form['rating']})
